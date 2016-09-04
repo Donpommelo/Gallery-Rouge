@@ -1,46 +1,55 @@
 package states;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
+
+import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.grouge.Application;
 
+import mission.Mission;
+import mission.MissionManager;
+import mission.SchmuckButton;
 import party.Schmuck;
 
-public class MapState implements Screen{
+public class MapState extends State{
 
-	private final Application game;
 	private Stage stage;
-	
+	public Skin skin;
+
 	private OrthographicCamera cam;
 	
-	private Image back;
-	private Skin skin;
+	private Image background;
 	private ShapeRenderer srend;
-	private float progress;
 	
-	public ScrollPane party;
-	public Label allies;
+	private TextButton back;
+
+	public ScrollPane party, missionPanel;
+	public Table allies, usedAllies;
 	
-	public MapState(final Application game){
-		this.game = game;
+	public MissionManager mm;
+	
+	public boolean missionSelected;
+	public ArrayList<Schmuck> unselected,selected;
+	
+	public MapState(Application game){
+		super(game);
 		this.srend = new ShapeRenderer();
 		this.stage = new Stage(new FitViewport(Application.V_WIDTH,Application.V_HEIGHT,game.camera));
 	}
@@ -48,15 +57,16 @@ public class MapState implements Screen{
 	@Override
 	public void show() {
 		Gdx.input.setInputProcessor(stage);
+		srend.setProjectionMatrix(app.camera.combined);
 
-		srend.setProjectionMatrix(game.camera.combined);
-		this.progress = 0f;
-		Texture backTexture = game.assets.get("test/Painting1.png", Texture.class);
-		back = new Image(backTexture);
+		Texture backTexture = app.assets.get("test/Liar Seeker Stranger Keeper.png", Texture.class);
+		background = new Image(backTexture);
+		cam = app.camera;
 		
-		cam = game.camera;
+		selected = new ArrayList<Schmuck>();
+		unselected = new ArrayList<Schmuck>();
 		
-		back.addListener(new DragListener(){
+		background.addListener(new DragListener(){
 			
 			public float prevX,prevY;
 			
@@ -69,27 +79,44 @@ public class MapState implements Screen{
 			
 			@Override
 			public void touchDragged(InputEvent event, float x, float y, int pointer){
-				cam.translate(prevX-x, prevY-y);
+				if(!missionSelected){
+					cam.translate(prevX-x, prevY-y);
+				}
 			}
 		});
 		
-		stage.addActor(back);
-		back.setPosition(stage.getWidth()/2-back.getWidth()/2, stage.getHeight()/2-back.getHeight()/2);
-		back.addAction(sequence(alpha(0f),fadeIn(2f)));
-		
-		allies = new Label("", skin);
-		
-		party = new ScrollPane(allies);
-		
-//		for(Schmuck s : game.party.getParty()){
-			
-//		}
+		stage.addActor(background);
+		background.setPosition(stage.getWidth()/2-background.getWidth()/2, stage.getHeight()/2-background.getHeight()/2);
+		background.addAction(sequence(alpha(0f),fadeIn(2f)));
 		
 		this.skin = new Skin();
-		this.skin.addRegions(game.assets.get("ui/uiskin.atlas",TextureAtlas.class));
-		this.skin.add("default-font",game.font24);
+		this.skin.addRegions(app.assets.get("ui/uiskin.atlas",TextureAtlas.class));
+		this.skin.add("default-font",app.font24);
 		this.skin.load(Gdx.files.internal("ui/uiskin.json"));
 		
+		allies = new Table();
+		usedAllies = new Table();
+
+		party = new ScrollPane(allies);
+		party.setHeight(200);
+		party.setVisible(false);
+		
+		missionPanel = new ScrollPane(usedAllies);
+		missionPanel.setHeight(200);
+		missionPanel.setVisible(false);
+
+		stage.addActor(party);
+		stage.addActor(missionPanel);
+		
+		missionSelected = false;
+		
+		this.mm = new MissionManager(app,this);
+		
+		for(Mission m : mm.initMissions()){
+			stage.addActor(m);
+		}
+		
+		initButtons();
 	}
 
 	@Override
@@ -100,22 +127,64 @@ public class MapState implements Screen{
 		update(delta);
 		
 		srend.begin(ShapeRenderer.ShapeType.Filled);
-		srend.setColor(Color.BLACK);
-		srend.rect(32,game.camera.viewportHeight/2 - 8, game.camera.viewportWidth - 64, 16);
 		
-		srend.setColor(Color.GREEN);
-		srend.rect(32,game.camera.viewportHeight/2 - 8, (game.camera.viewportWidth - 64) * progress, 16);
-
 		srend.end();
 		
 		stage.draw();
 		
-		game.batch.begin();
+		app.batch.begin();
 
-		game.batch.end();
+		app.batch.end();
 	}
 	
-	private void update(float delta){
+	public void initButtons(){
+		back = new TextButton("Back", skin);
+		back.setPosition(5, 55);
+		back.addListener(new ClickListener(){
+			
+			@Override
+			public void clicked(InputEvent event, float x, float y){
+				if(missionSelected){
+					missionSelected = false;
+					party.setVisible(false);
+					missionPanel.setVisible(false);
+					back.setVisible(false);
+				}
+				
+			}
+		});
+		
+		back.setVisible(false);
+		
+		stage.addActor(back);
+
+	}
+	
+	public void missionSelect(){
+		
+		unselected.clear();
+		selected.clear();
+		allies.clear();
+		usedAllies.clear();
+		
+		for(Schmuck s : app.party.getParty()){
+			unselected.add(s);
+			allies.add(new SchmuckButton(s,app,this));
+			allies.row();
+		}
+		
+		missionSelected = true;
+		party.setPosition(cam.position.x-stage.getWidth()/2, cam.position.y);
+		party.setVisible(true);
+		
+		missionPanel.setPosition(cam.position.x+stage.getWidth()/2-missionPanel.getWidth(), cam.position.y);
+		missionPanel.setVisible(true);
+		
+		back.setPosition(cam.position.x-stage.getWidth()/2, cam.position.y-stage.getHeight()/2);
+		back.setVisible(true);
+	}
+	
+	public void update(float delta){
 		stage.act(delta);
 	}
 

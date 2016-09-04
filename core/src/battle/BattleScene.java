@@ -5,24 +5,27 @@ import status.Status;
 
 public class BattleScene {
 	
-	public int frames;
+	public int preFrames,postFrames;
 	public String text;
 	public BattleAction ba;
 	public Status st;
 	
-	public BattleScene(int frames, String text){
-		this.frames = frames;
+	public BattleScene(int preFrames,int postFrames, String text){
+		this.preFrames = preFrames;
+		this.postFrames = postFrames;
 		this.text = text;
 	}
 	
-	public BattleScene(int frames, String text, Status st){
-		this.frames = frames;
+	public BattleScene(int preFrames,int postFrames, String text, Status st){
+		this.preFrames = preFrames;
+		this.postFrames = postFrames;
 		this.text = text;
 		this.st = st;
 	}
 	
-	public BattleScene(int frames, String text, BattleAction ba){
-		this.frames = frames;
+	public BattleScene(int preFrames,int postFrames, String text, BattleAction ba){
+		this.preFrames = preFrames;
+		this.postFrames = postFrames;
 		this.text = text;
 		this.ba= ba;
 	}
@@ -31,8 +34,12 @@ public class BattleScene {
 
 	}
 
-	public int getFrames() {
-		return frames;
+	public int getPreFrames() {
+		return preFrames;
+	}
+	
+	public int getPostFrames() {
+		return postFrames;
 	}
 
 	public String getText() {

@@ -1,21 +1,20 @@
 package states;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveBy;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.parallel;
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 
 import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -24,12 +23,14 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.grouge.Application;
 
-import abilities.Skill;
 import abilities.StandardAttack;
 import battle.BattleAction;
 import battle.BattleButton;
 import battle.BattleQueue;
 import battle.BattleText;
+import battle.EffectManager;
+import battle.InfoPanel;
+import battle.StatusManager;
 import abilities.SkillButton;
 import party.Schmuck;
 import states.StateManager.STATE;
@@ -40,29 +41,32 @@ public class BattleState extends State{
 	
 	public Stage stage;
 	public Skin skin;
-	
+	private Image qImage;
+
 //	public Schmuck actor, opposing;
-	public Skill skillChosen;
-	public BattleAction partyAction,enemyAction;
+	public BattleAction curAction;
+	public ArrayList<BattleAction> actions;
 	
 	public ArrayList<Schmuck> party, enemy,battlers;
+	public ArrayList<BattleButton> targetable;
 	public ArrayList<SkillButton> skillButtons;
+	public Schmuck fieldDummy;
 	
 	private TextButton back;
+	public TextButton nextRound,ded;
+	public InfoPanel info;
 
-	public TextButton nextRound;
+	public boolean infoShowing, textlogShowing,dedShowing;
+	public boolean partyReady,enemyReady;
 	
-	public boolean infoShowing;
-
-	private boolean textlogShowing;
-	public int prevX,prevY;
-	public BattleButton examining;
-	public TextButton info;
+	private STATE nextState;
 	
-	private STATE nextScreen;
+	public ShapeRenderer sr;
 	
 	public BattleQueue bq;
 	public BattleText bt;
+	public EffectManager em;
+	public StatusManager stm;
 	private TextButton battleLabel;
 	private ScrollPane battlePane;
 	
@@ -85,17 +89,32 @@ public class BattleState extends State{
 		
 		this.skin = new Skin();
 		this.skin.addRegions(game.assets.get("ui/uiskin.atlas",TextureAtlas.class));
-		this.skin.add("default-font",game.font24);
+		this.skin.add("default-font",game.font24w);
 		this.skin.load(Gdx.files.internal("ui/uiskin.json"));
 		
 		stage.clear();
 		
+		Texture backTexture = game.assets.get("ui/TOQ.png", Texture.class);
+		qImage = new Image(backTexture);
+		qImage.setPosition(stage.getWidth()/2-qImage.getWidth()/2, stage.getHeight()-qImage.getHeight());
+		qImage.toBack();
+		stage.addActor(qImage);
+		
 		bt = new BattleText("", this);
-
+		em = new EffectManager(game, this);
+		stm = new StatusManager(game, this);
 		phase = 0;
 		roundNum = 1;
-				
+		
+		sr = new ShapeRenderer();
+		sr.setProjectionMatrix(app.camera.combined);
+
 		this.bq = new BattleQueue(this,game,party,enemy);
+		
+		for(Schmuck s : bq.all){
+			stm.statusProcTime(2, this, null, s, null, null, 0, 0, true, null);
+		}
+		stm.statusProcTime(2, this, null, fieldDummy, null, null, 0, 0, true, null);
 
 		this.initSkillButtons();
 		this.initMiscButtons();
@@ -106,9 +125,7 @@ public class BattleState extends State{
 		if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
 			if(infoShowing){
 				info.addAction(moveBy(500,0,.5f,Interpolation.pow5Out));
-				examining.addAction(Actions.moveTo(prevX, prevY,.5f,Interpolation.pow5Out));
-//				examining.addAction(Actions.moveTo(bq.getCoord(bq.toq.indexOf(examining))[0],bq.getCoord(bq.toq.indexOf(examining))[1],.5f,Interpolation.pow5Out));
-				examining.toBack();
+				bq.adjustButtons();
 				infoShowing = false;
 			}
 		}
@@ -116,14 +133,26 @@ public class BattleState extends State{
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
-		if(bt.getScenes().isEmpty()){
-			update(delta);
-		}
-		else{
+		if(!bt.getScenes().isEmpty()){
 			bt.render();
 		}
-	
+
+		update(delta);
+
 		stage.draw();
+		if(partyReady && !enemyReady){
+			//If vs computer, enemy is ready automatically
+			enemyReady = true;
+			bq.adjustButtons();
+		}
+		
+		if(partyReady && enemyReady){
+			actions.add(curAction);
+			execActions();
+		}
+		if(bt.roundBegan){
+			queueActions();
+		}
 		
 	}
 	
@@ -156,8 +185,12 @@ public class BattleState extends State{
 		this.party = party;
 		this.enemy = enemy;
 		this.ActionGroupSize = size;
-		this.nextScreen = screen;
+		this.nextState = screen;
 		this.battlers = new ArrayList<Schmuck>();
+		this.targetable = new ArrayList<BattleButton>();
+		this.actions = new ArrayList<BattleAction>();
+		
+		this.fieldDummy = new Schmuck();
 		
 		for(Schmuck s : party){
 			battlers.add(s);
@@ -167,33 +200,46 @@ public class BattleState extends State{
 			battlers.add(s);
 		}
 		
+		partyReady = false;
+		enemyReady = false;
+		
+		infoShowing = false;
+		textlogShowing = false;
+		dedShowing = false;
 	}
 	
 	public void initSkillButtons(){
 		skillButtons = new ArrayList<SkillButton>();
 		
 		for(int i = 0; i < 4; i++){
-			skillButtons.add(new SkillButton(new StandardAttack(), skin));
-//			skillButtons.get(i).setSize(50, 32);
+			skillButtons.add(new SkillButton(new StandardAttack(), skin,this));
 			skillButtons.get(i).setPosition(300,-i*50-50);
 			
 			skillButtons.get(i).addListener(new ClickListener(){
 				
 				@Override
 				public void clicked(InputEvent event, float x, float y){
-					skillChosen = ((SkillButton) event.getListenerActor()).getSkill();
-					switch(skillChosen.targetType){
+					curAction = new BattleAction(bq.actor.getSchmuck(),new ArrayList<Schmuck>(),
+							((SkillButton) event.getListenerActor()).getSkill());
+					
+					//make targets flashing
+					
+					switch(curAction.getSkill().targetType){
 					case 0:
-						partyAction = new BattleAction(bq.actor.getSchmuck(),bq.actor.getSchmuck(),skillChosen);
-						execActions();
+						phase = 2;
 						break;
 					case 1:
+						for(BattleButton b: curAction.getSkill().getTargets(bq.actor, bq)){
+							curAction.addTarget(b.getSchmuck(), ((SkillButton) event.getListenerActor()).bs);
+						}
 						phase = 2;
 						break;
 					case 2:
-						
 						break;
 					}
+					
+					bq.manageFlash(curAction.checkReady(((SkillButton) event.getListenerActor()).bs));
+
 				}
 			});
 			
@@ -202,7 +248,8 @@ public class BattleState extends State{
 	}
 	
 	private void initMiscButtons(){
-		info = new TextButton("",skin);
+		
+		info = new InfoPanel(skin);
 		info.setSize(500, 500);
 		info.setPosition(stage.getWidth(), 0);
 		
@@ -213,9 +260,11 @@ public class BattleState extends State{
 			
 			@Override
 			public void clicked(InputEvent event, float x, float y){
-				bt.addScene("Round: "+roundNum+" Start!");
-				nextRound.addAction(moveBy(0,500,.5f,Interpolation.pow5Out));
-				bq.getDelegates();
+				if(bt.getScenes().isEmpty()){
+					bt.addScene("Round: "+roundNum+" Start!");
+					nextRound.addAction(moveBy(0,500,.5f,Interpolation.pow5Out));
+					bq.getDelegates();
+				}
 			}
 		});
 		
@@ -225,29 +274,42 @@ public class BattleState extends State{
 			
 			@Override
 			public void clicked(InputEvent event, float x, float y){
-				switch(phase){
-				case 0:
-					//nothing
-					break;
-				case 1:
-					for(int i = 0; i < skillButtons.size(); i++){
-						skillButtons.get(i).addAction(sequence(alpha(0), parallel(fadeIn(.5f),moveBy(0,-200,.5f,Interpolation.pow5Out))));
-						bq.actor = null;
-						bq.adjustButtons();
-					}							
-
-					phase = 0;
-					break;
-				case 2:
-					phase = 1;
-					break;
+				if(bt.getScenes().isEmpty()){
+					switch(phase){
+					case 0:
+						//nothing
+						break;
+					case 1:
+						for(int i = 0; i < skillButtons.size(); i++){
+							skillButtons.get(i).addAction(sequence(alpha(0), parallel(fadeIn(.5f),moveBy(0,-400,.5f,Interpolation.pow5Out))));
+							bq.actor = null;
+							bq.adjustButtons();
+						}							
+						bq.manageFlash(bq.actionAllies);
+//						phase = 0;
+						break;
+					case 2:
+						curAction = null;
+						phase = 1;
+						bq.manageFlash(new ArrayList<BattleButton>());
+						break;
+					}
 				}
 			}
 		});
 		
+		ded = new TextButton("Ded", skin);
+		ded.setPosition(stage.getWidth()-ded.getWidth(), stage.getHeight()-ded.getHeight());
+		ded.addListener(new ClickListener(){
+			
+			@Override
+			public void clicked(InputEvent event, float x, float y){
+				dedShowing = !dedShowing;
+				bq.adjustButtons();
+			}
+		});
+		
 		battleLabel = new TextButton("", skin);
-		//	battleLabel.setSize(stage.getWidth(), stage.getHeight());
-		//	battleLabel.setPosition(0, -5*stage.getHeight()/6);
 		battleLabel.getLabel().setAlignment(Align.topLeft);
 
 		battlePane = new ScrollPane(battleLabel);
@@ -259,6 +321,7 @@ public class BattleState extends State{
 			public void clicked(InputEvent event, float x, float y){
 				if(textlogShowing == false){
 					event.getListenerActor().addAction(parallel(moveBy(0,7*stage.getHeight()/8,.5f,Interpolation.pow5Out)));
+					event.getListenerActor().toFront();
 					textlogShowing = true;
 				}
 				else{
@@ -272,38 +335,82 @@ public class BattleState extends State{
 		stage.addActor(nextRound);
 		stage.addActor(info);
 		stage.addActor(battlePane);
+		stage.addActor(ded);
 	}
 	
 	public void execActions(){
 		
-		//bq.actor = partyAction.getUser();
+		bq.manageFlash(new ArrayList<BattleButton>());
 		
-		if(!bq.actionEnemy.isEmpty()){
-			int rand = (int) (Math.random()*bq.actionEnemy.size());
-			bq.opposing = bq.actionEnemy.get(rand);
-			
-			enemyAction = bq.opposing.getSchmuck().getAction(this);
-			
-			if(bq.opposing.getSchmuck().getBuffedStat(3) >= bq.actor.getSchmuck().getBuffedStat(3)){
-				bt.addScene(enemyAction.getText(),enemyAction);
-				bt.addScene(partyAction.getText(),partyAction);
+		partyReady = false;
+		enemyReady = false;
+		
+		sortActions(actions);
+		
+		for(Schmuck s : bq.all){
+			stm.statusProcTime(5, this, null, s, null, null, 0, 0, true, null);
+		}
+		stm.statusProcTime(5, this, null, fieldDummy, null, null, 0, 0, true, null);
+		
+		bt.roundBegan = true;
+		
+		for(int i = 0; i < skillButtons.size(); i++){
+			skillButtons.get(i).addAction(sequence(alpha(1), parallel(fadeOut(.5f),moveTo(300,-i*50-50,.5f,Interpolation.pow5Out))));
+		}
+		
+	}
+	
+	public void queueActions(){
+		if(bt.getScenes().isEmpty()){
+			if(actions.isEmpty()){
+				bt.addScene("Round: "+roundNum+" End!");
+				bt.roundBegan = false;
+				bq.endofRound();
 			}
 			else{
-				bt.addScene(partyAction.getText(),partyAction);	
-				bt.addScene(enemyAction.getText(),enemyAction);
+				bt.addScene(actions.get(0).getText(),actions.get(0));
+				actions.remove(0);
 			}
-			
+		}
+		
+	}
+	
+	public void endFight(boolean won){
+		
+		bt.getScenes().clear();
+		
+		if(won){
 			
 		}
 		else{
-			bt.addScene(partyAction.getText(),partyAction);	
+			
 		}
 		
-		for(int i = 0; i < skillButtons.size(); i++){
-			skillButtons.get(i).addAction(sequence(alpha(0), parallel(fadeIn(.5f),moveBy(0,-200,.5f,Interpolation.pow5Out))));
+		for(Schmuck s : bq.all){
+			stm.statusProcTime(3, this, null, s, null, null, 0, 0, won, null);
 		}
+		stm.statusProcTime(3, this, null, fieldDummy, null, null, 0, 0, won, null);
+
 		
-		bq.endofRound();
+		game.states.setScreen(nextState);
+	}
+	
+	public void runAction(BattleAction a){
+		
+		for(Schmuck s : bq.all){
+			stm.statusProcTime(6, this, a, s, null, null, 0, 0, true, null);
+		}
+		stm.statusProcTime(6, this, a, fieldDummy, null, null, 0, 0, true, null);
+
+		a.run(this);
+		
+		em.mpChange(this, a.getUser(), a.getUser(), -a.getSkill().getCost(), 0);
+		
+		for(Schmuck s : bq.all){
+			stm.statusProcTime(7, this, a, s, null, null, 0, 0, true, null);
+		}
+		stm.statusProcTime(7, this, a, fieldDummy, null, null, 0, 0, true, null);
+
 	}
 	
 	public void updateText(){
@@ -322,4 +429,33 @@ public class BattleState extends State{
 			battleLabel.left().top();
 		}
 	}
+	
+	public void sortActions(ArrayList<BattleAction> actions){
+		int j;
+		boolean flag = true;
+		BattleAction temp;
+		while (flag){
+			flag=false;
+			for(j=0; j<actions.size()-1; j++){
+				if(actions.get(j) != null && actions.get(j+1) != null){
+					if(actions.get(j).getUser().getInit(this) < actions.get(j+1).getUser().getInit(this)){
+						temp = actions.get(j);
+						actions.set(j,actions.get(j+1));
+						actions.set(j+1,temp);
+						flag = true;
+					}
+				}
+			}
+		}
+	}
+	
+	public void infoPanel(BattleButton examining){
+		info.addAction(moveBy(-500,0,.5f,Interpolation.pow5Out));
+		info.updateSchmuck(this,examining.getSchmuck());
+		examining.addAction(Actions.moveTo(500, 350,.5f,Interpolation.pow5Out));
+		info.toFront();
+		examining.toFront();
+		infoShowing = true;
+	}
+	
 }

@@ -12,7 +12,8 @@ public class BattleText{
 	
 	private BattleState bs;
 	
-	private Boolean actionRun;
+	private Boolean sceneBegan,actionRun;
+	public Boolean roundBegan;
 	
 	private int frames; 
 	
@@ -21,31 +22,50 @@ public class BattleText{
 		scenes = new ArrayList<BattleScene>();
 		textLog = new ArrayList<String>();
 		actionRun = false;
+		sceneBegan = false;
+		roundBegan = false;
 		frames = 0;
 	}
 	
 	public void render(){
 		if(!scenes.isEmpty()){
-			if(!actionRun){
+			if(!sceneBegan){
 				textLog.add(scenes.get(0).getText());
 				scenes.get(0).animateThing(bs);
 				bs.updateText();
-				actionRun = true;
+				sceneBegan = true;
+				actionRun = false;
 				frames = 0;
 			}
 			else{
-				if(frames >= scenes.get(0).getFrames()){
-					
-					if(scenes.get(0).getBa() != null){
-						scenes.get(0).getBa().run(bs);
+				if(!actionRun){
+					if(frames >= scenes.get(0).getPreFrames()){
+						
+						if(scenes.get(0).getBa() != null){
+							bs.runAction(scenes.get(0).getBa());
+						}
+						if(scenes.get(0).getSt() != null){
+							scenes.get(0).getSt().postAnimRun(bs);
+						}
+						actionRun = true;
+						frames = 0;
 					}
-					actionRun = false;
-					scenes.remove(0);
+					else{
+						frames++;
+					}
 				}
 				else{
-					frames++;
+					if(frames >= scenes.get(0).getPostFrames()){
+						scenes.remove(0);
+						sceneBegan = false;
+						if(scenes.isEmpty()){
+							bs.stm.adjustAll(bs);
+						}
+					}
+					else{
+						frames++;
+					}
 				}
-
 			}
 			
 		}
@@ -56,15 +76,15 @@ public class BattleText{
 	}
 	
 	public void addScene(String text){
-		scenes.add(new BattleScene(10,text));
+		scenes.add(new BattleScene(25,25,text));
 	}
 	
 	public void addScene(String text, BattleAction ba){
-		scenes.add(new BattleScene(100,text,ba));
+		scenes.add(new BattleScene(75,75,text,ba));
 	}
 	
 	public void addScene(String text, Status st){
-		scenes.add(new BattleScene(25,text,st));
+		scenes.add(new BattleScene(75,75,text,st));
 	}
 	
 }

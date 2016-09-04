@@ -30,6 +30,7 @@ public class StateManager {
 	   this.gameScreens.put(STATE.LOADING, new LoadingState(game));
 	   this.gameScreens.put(STATE.CUTSCENE, new CutsceneState(game));
 	   this.gameScreens.put(STATE.BATTLE, new BattleState(game));
+	   this.gameScreens.put(STATE.MAP, new MapState(game));
    }
    
    public void setScreen(STATE nextScreen){

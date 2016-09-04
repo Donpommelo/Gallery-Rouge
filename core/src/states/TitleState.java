@@ -16,6 +16,8 @@ import com.grouge.Application;
 
 import dialog.Dialog;
 import party.Candleman;
+import party.Docent;
+import party.Enforcer;
 import party.Schmuck;
 import states.StateManager.STATE;
 
@@ -120,16 +122,21 @@ public class TitleState extends State{
 				d[4] = new Dialog("test/Painting1.png","charBusts/Player-1.png","Operator","Very well. Which floor for you, then?",false,game);
 				
 				game.states.getCutsceneScreen().setDialog(d, STATE.BATTLE);
-				game.states.setScreen(STATE.CUTSCENE);
+			//	game.states.setScreen(STATE.CUTSCENE);
 
-				ArrayList<Schmuck> party = new ArrayList<Schmuck>();
+			//	ArrayList<Schmuck> party = new ArrayList<Schmuck>();
 				ArrayList<Schmuck> enemy = new ArrayList<Schmuck>();
-				for(int i = 0; i < 10; i++){
-					party.add(new Candleman());
+				for(int i = 0; i < 3; i++){
 					enemy.add(new Candleman());
 				}
-				game.states.getBattleState().initParties(party, enemy, 5, STATE.TITLE);
-			//	game.states.setScreen(STATE.BATTLE);
+				
+				game.party.addSchmuck(new Candleman());
+				game.party.addSchmuck(new Docent());
+				game.party.addSchmuck(new Enforcer());
+				
+				game.states.getBattleState().initParties(game.party.getParty(), enemy, 5, STATE.TITLE);
+				game.states.setScreen(STATE.BATTLE);
+				
 			//	game.states.setScreen(STATE.MAP);
 			}
 		});

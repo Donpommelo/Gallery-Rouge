@@ -1,6 +1,8 @@
 package status;
 
+import battle.BattleAction;
 import party.Schmuck;
+import states.BattleState;
 
 public class Status {
 	public int id = 0;
@@ -24,10 +26,51 @@ public class Status {
 		this.vic = v;
 	}
 	
-	//Called whenever any buffed stat is checked/.
-	public int statChange(int statNum){
-		return vic.getBaseStat(statNum);
-	}
+	public void postAnimRun(BattleState bs){}
+	
+	//Called whenever any buffed stat is checked. BattleState is checked if in Battle.
+	public int statChange(int amount,int statNum){return amount;}
+	
+	public int statChange(BattleState bs,Schmuck vic, int amount,int statNum){return amount;}
+	
+	//Called when this status is inflicted
+	public void onStatusInflict(BattleState bs,Schmuck perp,Schmuck vic,Status st){}
+	
+	//Called when this status is cured
+	public void onStatusCure(BattleState bs,Schmuck perp,Schmuck vic,Status st){}
+
+	//Called when a fight begins
+	public void fightStart(BattleState bs){}
+	
+	//Called when a fight ends
+	public void fightEnd(BattleState bs){}
+	
+	//Called after each round after combat processing
+	public void postRound(BattleState bs){}
+	
+	//Called after being selected to be in the Action Group
+	public void postDelegation(BattleState bs){}
+	
+	//Called before an action is performed
+	public void preAction(BattleState bs, BattleAction ba){}
+		
+	//Called after an action is performed
+	public void onAction(BattleState bs, BattleAction ba){}
+		
+	//Called when a schmuck's hp changes
+	public int onHpChange(BattleState bs, Schmuck perp,Schmuck vic, int damage, int elem){return damage;}
+	
+	//Called when a schmuck's mp changes
+	public int onMpChange(BattleState bs, Schmuck perp,Schmuck vic, int damage, int elem){return damage;}
+		
+	//Called when a schmuck is incapacitated
+	public void onDeath(BattleState bs, Schmuck perp,Schmuck vic){}	
+	
+	//Called when a schmuck goes insane
+	public void onInsanity(BattleState bs, Schmuck perp,Schmuck vic){}
+	
+	public void onTargetAcquire(BattleState bs, BattleAction ba){}
+
 	
 	public int getId(){
 		return id;

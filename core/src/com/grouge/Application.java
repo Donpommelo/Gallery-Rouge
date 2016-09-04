@@ -34,7 +34,7 @@ public class Application extends Game{
     public SpriteBatch batch;
     public ShapeRenderer sr;
     
-    public BitmapFont font24;
+    public BitmapFont font24,font24w;
     
     @Override
     public void create() {
@@ -77,5 +77,8 @@ public class Application extends Game{
        params.size = 24;
        params.color = Color.BLACK;
        font24 = generator.generateFont(params);
+
+       params.color = Color.WHITE;
+       font24w = generator.generateFont(params);
     }
 }

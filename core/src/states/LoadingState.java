@@ -56,11 +56,25 @@ public class LoadingState extends State{
 	
 	private void queueAssets(){
 		app.assets.load("test/Painting1.png", Texture.class);
+		app.assets.load("test/Liar Seeker Stranger Keeper.png", Texture.class);
 		app.assets.load("charIcons/Bad Egg.png", Texture.class);
-		
+		app.assets.load("charIcons/Bhurglemeister.png", Texture.class);
+		app.assets.load("charIcons/2Bhurglemeister.png", Texture.class);
+		app.assets.load("charIcons/Candleman.png", Texture.class);
+		app.assets.load("charIcons/2Candleman.png", Texture.class);
+		app.assets.load("charIcons/EnforcerA.png", Texture.class);
+		app.assets.load("charIcons/2EnforcerA.png", Texture.class);
+		app.assets.load("charIcons/EnforcerB.png", Texture.class);
+		app.assets.load("charIcons/2EnforcerB.png", Texture.class);
+		app.assets.load("charIcons/EnforcerC.png", Texture.class);
+		app.assets.load("charIcons/2EnforcerC.png", Texture.class);
+		app.assets.load("charIcons/Pluot.png", Texture.class);
+		app.assets.load("charIcons/2Pluot.png", Texture.class);
+
 		app.assets.load("charBusts/Player-1.png", Texture.class);
 		app.assets.load("charBusts/Player-5.png", Texture.class);
 
+		app.assets.load("ui/TOQ.png", Texture.class);
 		app.assets.load("ui/uiskin.png", Texture.class);
 		app.assets.load("ui/uiskin.atlas",TextureAtlas.class);
 	}

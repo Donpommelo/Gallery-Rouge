@@ -76,31 +76,30 @@ public class CutsceneState extends State {
 	}
 	
 	@Override
-	public void update(float delta){
+	public void update(float delta) {
 		stage.act(delta);
 	}
 	
-	private void initButtons(){
+	private void initButtons() {
 		speech = new TextButton("",skin,"default");
-		speech.setSize(stage.getWidth(), stage.getHeight()/5);
+		speech.setSize(stage.getWidth(), stage.getHeight() / 5);
 		speech.setPosition(0,0);
 		
-		speech.addListener(new ClickListener(){
+		speech.addListener(new ClickListener() {
 			
 			@Override
-			public void clicked(InputEvent event, float x, float y){
-				if(currentIndex == dialog.length-1){
+			public void clicked(InputEvent event, float x, float y) {
+				if (currentIndex == dialog.length-1) {
 					game.states.setScreen(nextState);
-				}
-				else{
+				} else {
 					nextDialog();
 				}
 			}
 		});
 		
 		speechDummy = new TextButton("",skin,"default");
-		speechDummy.setSize(stage.getWidth(), stage.getHeight()/5);
-		speechDummy.setPosition(0,-stage.getHeight()/5);
+		speechDummy.setSize(stage.getWidth(), stage.getHeight() / 5);
+		speechDummy.setPosition(0,-stage.getHeight() / 5);
 		
 		back = new Image();
 		back.setSize(stage.getWidth(), stage.getHeight());
@@ -131,14 +130,14 @@ public class CutsceneState extends State {
 		this.currentIndex = -1;
 	}
 	
-	private void nextDialog(){
+	private void nextDialog() {
 		currentIndex++;
-		if(currentIndex != 0){
-			speechDummy.setText(dialog[currentIndex-1].getText());
+		if (currentIndex != 0) {
+			speechDummy.setText(dialog[currentIndex - 1].getText());
 			speechDummy.addAction(moveTo(0, 0));
-			speechDummy.addAction(moveBy(0, -stage.getHeight()/5, .5f, Interpolation.pow5Out));
-			
+			speechDummy.addAction(moveBy(0, -stage.getHeight() / 5, .5f, Interpolation.pow5Out));
 		}
+		
 		back.setDrawable(new TextureRegionDrawable(new TextureRegion(dialog[currentIndex].getBground())));
 		speech.setText(dialog[currentIndex].getText());
 		
@@ -147,23 +146,22 @@ public class CutsceneState extends State {
 		
 		tr.setRegion(dialog[currentIndex].getSpeaker());
 
-		if(dialog[currentIndex].getMirror()){
+		if (dialog[currentIndex].getMirror()) {
 			tr.flip(true, false);
-			speaker.setPosition(stage.getWidth(), stage.getHeight()/5);
+			speaker.setPosition(stage.getWidth(), stage.getHeight() / 5);
 			speaker.addAction(moveBy(-dialog[currentIndex].getSpeaker().getWidth(), 0, .5f, Interpolation.pow5Out));
-			namePlate.setPosition(stage.getWidth()-dialog[currentIndex].getSpeaker().getWidth(), stage.getHeight()/2);
-		}
-		else{
-			speaker.setPosition(-dialog[currentIndex].getSpeaker().getWidth(), stage.getHeight()/5);
+			namePlate.setPosition(stage.getWidth() - dialog[currentIndex].getSpeaker().getWidth(), stage.getHeight() / 2);
+		} else {
+			speaker.setPosition(-dialog[currentIndex].getSpeaker().getWidth(), stage.getHeight() / 5);
 			speaker.addAction(moveBy(dialog[currentIndex].getSpeaker().getWidth(), 0, .5f, Interpolation.pow5Out));
-			namePlate.setPosition(0, stage.getHeight()/2);
+			namePlate.setPosition(0, stage.getHeight() / 2);
 		}
 		speaker.setDrawable(new TextureRegionDrawable(tr));
 
 	}
 	
 	@Override
-	public void dispose(){
+	public void dispose() {
 		stage.dispose();
 		skin.dispose();
 		

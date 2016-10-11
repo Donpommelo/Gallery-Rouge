@@ -41,20 +41,24 @@ public class SchmuckButton extends Button{
 			@Override
 			public void clicked(InputEvent event, float x, float y){
 				Schmuck me = ((SchmuckButton)(event.getListenerActor())).getSchmuck();
-				if(ms.unselected.contains(me)){
+				if (ms.unselected.contains(me)) {
 					ms.unselected.remove(me);
 					ms.selected.add(me);
-					ms.usedAllies.row();
-					ms.allies.removeActor(((SchmuckButton)(event.getListenerActor())));
-					ms.usedAllies.addActor(((SchmuckButton)(event.getListenerActor())));
-				}
-				else if(ms.selected.contains(me)){
+				} else if(ms.selected.contains(me)){
 					ms.selected.remove(me);
 					ms.unselected.add(me);
+				}
+				
+				ms.allies.clear();
+				ms.usedAllies.clear();
+				
+				for(Schmuck s : ms.selected){
+					ms.usedAllies.add(new SchmuckButton(s,game,ms));
+					ms.usedAllies.row();
+				}
+				for(Schmuck s : ms.unselected){
+					ms.allies.add(new SchmuckButton(s,game,ms));
 					ms.allies.row();
-					ms.allies.addActor(((SchmuckButton)(event.getListenerActor())));
-					ms.usedAllies.removeActor(((SchmuckButton)(event.getListenerActor())));
-
 				}
 			}
 		});

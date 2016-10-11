@@ -3,7 +3,6 @@ package abilities;
 import java.util.ArrayList;
 
 import battle.BattleButton;
-import battle.BattleQueue;
 import party.Schmuck;
 import states.BattleState;
 
@@ -13,7 +12,7 @@ public class Reassurance extends Skill{
 	public final static String descr = "TEMP";
 	public final static int id = 4;
 	public final static int cost = 5;
-	public final static double init = 1;
+	public final static double init = 0.0;
 	public final static int target = 0;
 	public final static int numTargets = 1;
 
@@ -28,8 +27,8 @@ public class Reassurance extends Skill{
 		}
 	}
 	
-	public ArrayList<BattleButton> getTargets(BattleButton user, BattleQueue bq){
-		return bq.actionq;
+	public ArrayList<BattleButton> getTargets(BattleButton user, BattleState bs){
+		return bs.bq.actionq;
 	}
 
 }

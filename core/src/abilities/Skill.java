@@ -3,7 +3,6 @@ package abilities;
 import java.util.ArrayList;
 
 import battle.BattleButton;
-import battle.BattleQueue;
 import party.Schmuck;
 import states.BattleState;
 
@@ -31,14 +30,13 @@ public class Skill {
 	public void use(Schmuck user, ArrayList<Schmuck> target, BattleState bs){
 	}
 
-	public ArrayList<BattleButton> getTargets(BattleButton user, BattleQueue bq){
+	public ArrayList<BattleButton> getTargets(BattleButton user, BattleState bs){
 		return new ArrayList<BattleButton>();
 	}
 	
 	public String useText(Schmuck user){
 		return user.getName()+" used "+this.getName()+"!";
 	}
-	
 	
 	public String getName() {
 		return name;
@@ -51,15 +49,19 @@ public class Skill {
 	public int getId() {
 		return id;
 	}
+	
+	public double getInit(){
+		return init;
+	}
 
 	public int getCost() {
 		return cost;
 	}
 
-	//0: Select a set number of schmucks.
-	//1: Automatically targets a set number of schumucks
+	//0: Select a set number of schmucks. (Includes nontargeted skills with 0 targets)
+	//1: Automatically targets the opposing actor.
+	//2: Targets a character from the ko queue. Extra targeting condition?
 	public int getTargetType() {
 		return targetType;
-	}
-	
+	}	
 }

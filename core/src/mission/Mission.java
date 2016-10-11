@@ -49,7 +49,7 @@ public class Mission extends Button{
 			public void clicked(InputEvent event, float x, float y){
 				if(!ms.missionSelected){
 					game.camera.translate(mapX-game.camera.position.x, mapY-game.camera.position.y);
-					ms.missionSelect();
+					ms.missionSelect((Mission) event.getListenerActor());
 				}
 			}
 			

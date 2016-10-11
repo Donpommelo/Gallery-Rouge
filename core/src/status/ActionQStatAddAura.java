@@ -45,10 +45,36 @@ public class ActionQStatAddAura extends Status{
 	}
 	
 	public String inflictText(Schmuck s){
-		return "Temp Text";
+		String stat = super.getStat(statChanged);
+		String change = "";
+		if (amount >= 0) {
+			change = "increas";
+		} else {
+			change = "decreas";
+		}
+		
+		if (teamAffected && enemyAffected) {
+			return perp.getName()+" is emenating a(n) "+stat+" "+change+"ing aura for all characters!";
+		} else if (teamAffected) {
+			return perp.getName()+" is emenating a(n) "+stat+" "+change+"ing aura for allies!";
+		} else if (enemyAffected) {
+			return perp.getName()+" is emenating a(n) "+stat+" "+change+"ing aura for enemies!";
+		}
+		
+		//This should never run
+		return "A "+stat+" "+change+"ing aura that affects nobody was created.";
 	}
 
 	public String cureText(Schmuck s){
-		return " ";
+		String stat = super.getStat(statChanged);
+		String change = "";
+		if (amount >= 0) {
+			change = "increas";
+		} else {
+			change = "decreas";
+		}
+		
+		return perp.getName()+"'s "+stat+" "+change+"ing aura disappeared!";
+
 	}
 }

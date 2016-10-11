@@ -9,7 +9,8 @@ import abilities.WaxingLight;
 
 public class Ascetic extends Schmuck{
 
-	public static final String name = "Polisher";
+	public static final String name = "Ascetic";
+	public static final int pronoun = 1;
 	public static final String bioShort = "TEMP";
 	public static final String bioLong = "TEMP";
 	
@@ -17,11 +18,11 @@ public class Ascetic extends Schmuck{
 	public static final Skill[] skills = {new StandardAttack(), new CandelaFlare(), new WaxingLight(),
 			new CallforBackup()};
 	
-	public static String icon = "Candleman.png";
+	public static String icon = "Pluot.png";
 	public static String sprite = "";
 	
 	public Ascetic() {
-		super(name, bioShort, bioLong, start, skills, icon, sprite);
+		super(name, pronoun, bioShort, bioLong, start, skills, icon, sprite);
 	}
 	
 }

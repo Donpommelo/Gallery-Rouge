@@ -12,7 +12,7 @@ public class CallforBackup extends Skill{
 	public final static String descr = "TEMP";
 	public final static int id = 1;
 	public final static int cost = 6;
-	public final static double init = 1;
+	public final static double init = 0.0;
 	public final static int target = 0;
 	public final static int numTargets = 0;
 

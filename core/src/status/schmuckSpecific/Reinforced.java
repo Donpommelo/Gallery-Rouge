@@ -1,8 +1,9 @@
-package status;
+package status.schmuckSpecific;
 
 import party.Enforcer;
 import party.Schmuck;
 import states.BattleState;
+import status.Status;
 
 public class Reinforced extends Status{
 	

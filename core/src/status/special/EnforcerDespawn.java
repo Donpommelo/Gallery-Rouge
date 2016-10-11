@@ -1,8 +1,9 @@
-package status;
+package status.special;
 
 import battle.BattleButton;
 import party.Schmuck;
 import states.BattleState;
+import status.Status;
 
 public class EnforcerDespawn extends Status{
 	

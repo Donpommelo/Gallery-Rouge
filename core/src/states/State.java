@@ -9,11 +9,11 @@ import com.grouge.Application;
 public abstract class State implements Screen{
 	
 	
-	protected final Application app;
+	public final Application app;
 	
 	Stage stage;
 	
-	public State(Application app){
+	public State(Application app) {
 		this.app = app;
 		this.stage = new Stage();
 	}
@@ -21,23 +21,23 @@ public abstract class State implements Screen{
 	public abstract void update(float delta);
 		
 	@Override
-	public void render(float delta){
+	public void render(float delta) {
 		update(delta);
 		Gdx.gl.glClearColor(.25f, .25f, .25f, 1f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 	}
 	
 	@Override
-	public void resize(int width, int height){
+	public void resize(int width, int height) {
 		stage.getViewport().update(width, height,true);
 	}
 	
 	@Override
-	public void dispose(){
+	public void dispose() {
 		stage.dispose();
 	}
 	
-	public Application getGame(){
+	public Application getGame() {
 		return app;
 	}
 

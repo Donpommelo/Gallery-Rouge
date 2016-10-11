@@ -31,15 +31,15 @@ public class LoadingState extends State{
 	}
 	
 	@Override
-	public void update(float delta){
+	public void update(float delta) {
         progress = MathUtils.lerp(progress, app.assets.getProgress(), .1f);
 
-        if(app.assets.update() && progress >= app.assets.getProgress() - .01f){
+        if(app.assets.update() && progress >= app.assets.getProgress() - .01f) {
 			this.getGame().states.setScreen(STATE.TITLE);
 		}
 	}
 	
-	public void render(float delta){
+	public void render(float delta) {
 		 Gdx.gl.glClearColor(1f, 1f, 1f, 1f);
 	        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -54,10 +54,12 @@ public class LoadingState extends State{
 	        shapeRenderer.end();
 	}
 	
-	private void queueAssets(){
+	private void queueAssets() {
 		app.assets.load("test/Painting1.png", Texture.class);
 		app.assets.load("test/Liar Seeker Stranger Keeper.png", Texture.class);
+		app.assets.load("test/so its a secret.png", Texture.class);
 		app.assets.load("charIcons/Bad Egg.png", Texture.class);
+		
 		app.assets.load("charIcons/Bhurglemeister.png", Texture.class);
 		app.assets.load("charIcons/2Bhurglemeister.png", Texture.class);
 		app.assets.load("charIcons/Candleman.png", Texture.class);
@@ -70,6 +72,10 @@ public class LoadingState extends State{
 		app.assets.load("charIcons/2EnforcerC.png", Texture.class);
 		app.assets.load("charIcons/Pluot.png", Texture.class);
 		app.assets.load("charIcons/2Pluot.png", Texture.class);
+
+		app.assets.load("charIcons/2Bandito.png", Texture.class);
+		app.assets.load("charIcons/2Gremlin.png", Texture.class);
+		app.assets.load("charIcons/2HatGremlin.png", Texture.class);
 
 		app.assets.load("charBusts/Player-1.png", Texture.class);
 		app.assets.load("charBusts/Player-5.png", Texture.class);

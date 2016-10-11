@@ -23,17 +23,16 @@ public class Application extends Game{
 
     public OrthographicCamera camera;
    
-
     //Managers
     public AssetManager assets;
     public StateManager states;
     public PartyManager party;
-
     
     //Batches
     public SpriteBatch batch;
     public ShapeRenderer sr;
     
+    //Fonts
     public BitmapFont font24,font24w;
     
     @Override
@@ -70,6 +69,7 @@ public class Application extends Game{
        
     }
 
+    //Initiate fonts upon creating a new application.
     private void initFonts() {
        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Arcon.ttf"));
        FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();

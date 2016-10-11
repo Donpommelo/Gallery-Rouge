@@ -29,15 +29,15 @@ public class Status {
 	public void postAnimRun(BattleState bs){}
 	
 	//Called whenever any buffed stat is checked. BattleState is checked if in Battle.
-	public int statChange(int amount,int statNum){return amount;}
+	public int statChange(int amount, int statNum){return amount;}
 	
-	public int statChange(BattleState bs,Schmuck vic, int amount,int statNum){return amount;}
+	public int statChange(BattleState bs, Schmuck vic, int amount, int statNum){return amount;}
 	
 	//Called when this status is inflicted
-	public void onStatusInflict(BattleState bs,Schmuck perp,Schmuck vic,Status st){}
+	public void onStatusInflict(BattleState bs, Schmuck perp, Schmuck vic, Status st){}
 	
 	//Called when this status is cured
-	public void onStatusCure(BattleState bs,Schmuck perp,Schmuck vic,Status st){}
+	public void onStatusCure(BattleState bs, Schmuck perp, Schmuck vic, Status st){}
 
 	//Called when a fight begins
 	public void fightStart(BattleState bs){}
@@ -58,16 +58,16 @@ public class Status {
 	public void onAction(BattleState bs, BattleAction ba){}
 		
 	//Called when a schmuck's hp changes
-	public int onHpChange(BattleState bs, Schmuck perp,Schmuck vic, int damage, int elem){return damage;}
+	public int onHpChange(BattleState bs, Schmuck perp, Schmuck vic, int damage, int elem){return damage;}
 	
 	//Called when a schmuck's mp changes
-	public int onMpChange(BattleState bs, Schmuck perp,Schmuck vic, int damage, int elem){return damage;}
+	public int onMpChange(BattleState bs, Schmuck perp, Schmuck vic, int damage, int elem){return damage;}
 		
 	//Called when a schmuck is incapacitated
-	public void onDeath(BattleState bs, Schmuck perp,Schmuck vic){}	
+	public void onDeath(BattleState bs, Schmuck perp, Schmuck vic){}	
 	
 	//Called when a schmuck goes insane
-	public void onInsanity(BattleState bs, Schmuck perp,Schmuck vic){}
+	public void onInsanity(BattleState bs, Schmuck perp, Schmuck vic){}
 	
 	public void onTargetAcquire(BattleState bs, BattleAction ba){}
 
@@ -114,5 +114,68 @@ public class Status {
 		return false;
 	}
 	
+	public String getStat(int statChanged){
+		String stat = "";
+		switch (statChanged) {
+		case 0:
+			stat = "Hp";
+			break;
+		case 1:
+			stat = "Mp";
+			break;
+		case 2:
+			stat = "Physical Alignment";
+			break;
+		case 3:
+			stat = "Special Alignment";
+			break;
+		case 4:
+			stat = "Abstract Alignment";
+			break;
+		case 5:
+			stat = "Physical Damage";
+			break;
+		case 6:
+			stat = "Special Damage";
+			break;
+		case 7:
+			stat = "Abstract Damage";
+			break;
+		case 8:
+			stat = "Physical Resistance";
+			break;
+		case 9:
+			stat = "Special Resistance";
+			break;
+		case 10:
+			stat = "Abstract Resistance";
+			break;
+		case 11:
+			stat = "Initiative";
+			break;	
+		case 12:
+			stat = "Hp Regeneration";
+			break;
+		case 13:
+			stat = "Mp Regeneration";
+			break;
+		case 14:
+			stat = "Damage Amplification";
+			break;
+		case 15:
+			stat = "Damage Resistance";
+			break;	
+		case 16:
+			stat = "Elemental Alignment";
+			break;
+		case 17:
+			stat = "Mp Costs";
+			break;
+		}
+		return stat;
+	}
 	
+	public int getExtraVar(){
+		return 0;
+	}
 }

@@ -9,7 +9,7 @@ public class StateManager {
    public final Application game;
    private HashMap<STATE, State> gameScreens;
    
-   public enum STATE{
+   public enum STATE {
 	   TITLE,
 	   LOADING,
 	   CUTSCENE,
@@ -17,14 +17,14 @@ public class StateManager {
 	   MAP,
    }
    
-   public StateManager(final Application game){
+   public StateManager(final Application game) {
 	   this.game = game;
 	   
 	   initGameScreens();
 	   setScreen(STATE.LOADING);
    }
    
-   public void initGameScreens(){
+   public void initGameScreens() {
 	   this.gameScreens = new HashMap<STATE,State>();
 	   this.gameScreens.put(STATE.TITLE, new TitleState(game));
 	   this.gameScreens.put(STATE.LOADING, new LoadingState(game));
@@ -33,19 +33,19 @@ public class StateManager {
 	   this.gameScreens.put(STATE.MAP, new MapState(game));
    }
    
-   public void setScreen(STATE nextScreen){
+   public void setScreen(STATE nextScreen) {
 	   game.setScreen(gameScreens.get(nextScreen));
    }
    
-   public void dispose(){
-	   for(State s : gameScreens.values()){
-		   if(s != null){
+   public void dispose() {
+	   for (State s : gameScreens.values()) {
+		   if (s != null) {
 			   s.dispose();
 		   }
 	   }
    }
    
-   public BattleState getBattleState(){
+   public BattleState getBattleState() {
 	   return (BattleState) gameScreens.get(STATE.BATTLE);
    }
 

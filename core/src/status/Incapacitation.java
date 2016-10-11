@@ -1,5 +1,8 @@
 package status;
 
+import java.util.ArrayList;
+
+import abilities.FlavorNothing;
 import battle.BattleAction;
 import party.Schmuck;
 import states.BattleState;
@@ -19,8 +22,7 @@ public class Incapacitation extends Status{
 	}
 	
 	public void onStatusInflict(BattleState bs,Schmuck perp,Schmuck vic,Status st){		
-		if(st.getId() == this.getId() && vic == this.vic){
-
+		if(st.getName() == this.getName() && vic == this.vic){
 			bs.bq.toq.remove(vic.getButton());
 			bs.bq.actionq.remove(vic.getButton());
 			bs.bq.ko.add(vic.getButton());
@@ -45,19 +47,25 @@ public class Incapacitation extends Status{
 	}
 	
 	public void onStatusCure(BattleState bs,Schmuck perp,Schmuck vic,Status st){
-		if(st.getId() == this.getId() && vic == this.vic){
+		if(st.getName() == this.getName() && vic == this.vic){
 			bs.bq.ko.remove(vic.getButton());
 			bs.bq.toq.add(vic.getButton());
 		}
 	}
 	
-	public void preAction(BattleState bs, BattleAction ba){
-		if(ba.getUser() == this.vic){
-			//replace action with empty action
+	public void preAction(BattleState bs, BattleAction ba){		
+		if (ba.getUser().equals(this.vic)) {
+			BattleAction fail = new BattleAction(this.vic, new ArrayList<Schmuck>(),
+					new FlavorNothing(ba.getUser().getName() + "'s "
+							+ "Incapacitation prevents " + vic.getPronoun(3) + " from performing an action!"));
+			bs.bt.skillReplace(0, fail);
 		}
 	}
-
 	
+	public Boolean runWhenDead(){
+		return true;
+	}
+
 	public String inflictText(Schmuck s){
 		return s.getName()+" was Incapacitated!";
 	}

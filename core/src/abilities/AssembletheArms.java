@@ -12,7 +12,7 @@ public class AssembletheArms extends Skill{
 	public final static String descr = "TEMP";
 	public final static int id = 1;
 	public final static int cost = 7;
-	public final static double init = 1;
+	public final static double init = 0.0;
 	public final static int target = 0;
 	public final static int numTargets = 0;
 
@@ -21,15 +21,17 @@ public class AssembletheArms extends Skill{
 	}
 	
 	public void use(Schmuck user, ArrayList<Schmuck> target, BattleState bs){
-		for(BattleButton b : bs.bq.toq){
+		for (BattleButton b : bs.bq.toq) {
 			
 			int index = bs.bq.toq.indexOf(b);
 
-			if(bs.bq.getAllyTeam(user).contains(b) && index != 0){
+			//If the schmuck is an ally and can be moved forwards, move them forwards.
+			if (bs.bq.getAllyTeam(user).contains(b) && index != 0) {
 				bs.bq.toq.set(index, bs.bq.toq.get(index-1));
 				bs.bq.toq.set(index-1, b);
 			}
 		}
+		
 		bs.bq.adjustButtons();
 	}
 

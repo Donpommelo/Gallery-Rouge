@@ -10,6 +10,10 @@ import states.BattleState;
 
 public class InfoPanel extends TextButton{
 
+	/*
+	 * Info Panel for schmucks. Appears whenever selecting a Battle button for non-targeting/selection purposes.
+	 * Very much a work in progress. 
+	 */
 	Schmuck schmuck;
 	Label stats,skills;
 	
@@ -27,21 +31,22 @@ public class InfoPanel extends TextButton{
 //		this.debug();
 	}
 	
-	public void updateSchmuck(BattleState bs, Schmuck s){
+	public void updateSchmuck(BattleState bs, Schmuck s) {
 		this.schmuck = s;
-		stats.setText("Hp: "+s.getCurrentHp()+"/"+s.getMaxHp(bs)+"\n"+
-		"Mp: "+s.getCurrentMp()+"/"+s.getMaxMp(bs)+"\n"+
-		"Phys: "+s.getPhys(bs)+"\n"+
-		"Spec: "+s.getSpec(bs)+"\n"+
-		"Abstr: "+s.getAbstr(bs));
+		stats.setText("Hp: " + s.getCurrentHp() + "/" + s.getMaxHp(bs) + "\n" +
+		"Mp: " + s.getCurrentMp() + "/" + s.getMaxMp(bs) + "\n" +
+		"Phys: " + s.getPhys(bs) + "\n" +
+		"Spec: " + s.getSpec(bs) + "\n" +
+		"Abstr: " + s.getAbstr(bs));
 		
 		String skill = "";
-		for(Skill sk : s.getSkills()){
-			if(sk.getName() != "Attack"){
-				skill = skill + sk.getName()+": "+sk.getDescr()+"\n";
+		for (Skill sk : s.getSkills()) {
+			if (sk.getName() != "Attack") {
+				skill = skill + sk.getName() + ": " + sk.getDescr() + "\n";
 			}
 		}
+		
+		
 		skills.setText(skill);
 	}
-
 }

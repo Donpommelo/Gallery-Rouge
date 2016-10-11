@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -23,8 +24,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.grouge.Application;
 
+import battle.InfoPanel;
 import mission.Mission;
 import mission.MissionManager;
+import mission.MissionPanel;
 import mission.SchmuckButton;
 import party.Schmuck;
 
@@ -39,6 +42,8 @@ public class MapState extends State{
 	private ShapeRenderer srend;
 	
 	private TextButton back;
+	
+	public MissionPanel info;
 
 	public ScrollPane party, missionPanel;
 	public Table allies, usedAllies;
@@ -138,6 +143,13 @@ public class MapState extends State{
 	}
 	
 	public void initButtons(){
+		
+		info = new MissionPanel(skin, this);
+		info.setSize(stage.getWidth()/2, stage.getHeight());
+		info.setPosition(stage.getWidth(), 0);
+		info.setVisible(false);
+		
+		
 		back = new TextButton("Back", skin);
 		back.setPosition(5, 55);
 		back.addListener(new ClickListener(){
@@ -149,6 +161,10 @@ public class MapState extends State{
 					party.setVisible(false);
 					missionPanel.setVisible(false);
 					back.setVisible(false);
+					
+					info.addAction(moveBy(500,0,.5f,Interpolation.pow5Out));
+					info.setVisible(false);
+
 				}
 				
 			}
@@ -157,11 +173,20 @@ public class MapState extends State{
 		back.setVisible(false);
 		
 		stage.addActor(back);
+		stage.addActor(info);
 
 	}
 	
-	public void missionSelect(){
+	public void missionSelect(Mission m){
 		
+		m.toFront();
+		party.toFront();
+		missionPanel.toFront();
+		
+		info.updateMission(this, m);
+		info.addAction(moveTo(cam.position.x, cam.position.y - stage.getHeight()/2, .5f, Interpolation.pow5Out));
+		info.setVisible(true);
+
 		unselected.clear();
 		selected.clear();
 		allies.clear();
